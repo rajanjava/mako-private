@@ -446,16 +446,16 @@ class Lexer:
 
     def match_control_line(self):
         match = self.match(
-            r"(?<=^)[\t ]*(%(?!%)|##)[\t ]*((?:(?:\\\r?\n)|[^\r\n])*)"
+            r"(?<=^)[\t ]*(?:(%(?!%))[\t ]*((?:(?:\\\r?\n)|[^\r\n])*)|(##)[\t ]*([^\r\n]*))"
             r"(?:\r?\n|\Z)",
             re.M,
         )
         if not match:
             return False
 
-        operator = match.group(1)
-        text = match.group(2)
+        operator = match.group(1) or match.group(3)
         if operator == "%":
+            text = match.group(2)
             m2 = re.match(r"(end)?(\w+)\s*(.*)", text)
             if not m2:
                 raise exceptions.SyntaxException(
@@ -479,6 +479,7 @@ class Lexer:
                     )
             self.append_node(parsetree.ControlLine, keyword, isend, text)
         else:
+            text = match.group(4)
             self.append_node(parsetree.Comment, text)
         return True
 

@@ -1660,6 +1660,34 @@ hi
             ),
         )
 
+    def test_comment_with_backslash(self):
+        template = """
+## comment ending with backslash \\
+Hello World
+"""
+        nodes = Lexer(template).parse()
+        self._compare(
+            nodes,
+            TemplateNode(
+                {},
+                [
+                    Text("\n", (1, 1)),
+                    Comment("comment ending with backslash \\", (2, 1)),
+                    Text("Hello World\n", (3, 1)),
+                ],
+            ),
+        )
+        assert Template(template).render().strip() == "Hello World"
+
+        template2 = """
+## comment with backslash \\
+% for x in [1, 2]:
+${x}
+% endfor
+"""
+        assert Template(template2).render().strip().split() == ["1", "2"]
+
+
     def test_docs(self):
         template = """
         <%doc>
